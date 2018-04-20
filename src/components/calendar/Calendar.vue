@@ -188,9 +188,9 @@
                 while (positions[i][col].isUse) {
                     let isUse = positions[i][col + 1].isUse
                     i++;
-                    if (isUse) {
+                   /* if (isUse) {
                         this.computeCols(positions, i, col + 1)
-                    }
+                    }*/
                 }
             }
         },
