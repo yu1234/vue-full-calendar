@@ -1,5 +1,5 @@
 <template>
-    <div class="calendar">
+    <div class="daySchedule">
         <div class="time-list">
             <div class="item" :style="{height:dayTimeHeight+'px' }" v-for="(dayTime,i) in dayTimes" :key="dayTime.id">
                 <div class="time">{{dayTime.text}}</div>
@@ -46,7 +46,7 @@
         {text: '23:00', id: 23},
     ]
     export default {
-        name: 'calendar',
+        name: 'day-schedule',
         props: {
             dayTimeHeight: {
                 type: Number,
@@ -329,7 +329,7 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="less">
-    .calendar {
+    .daySchedule {
         .time-list {
             display: flex;
             flex-direction: column;

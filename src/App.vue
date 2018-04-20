@@ -1,17 +1,17 @@
 <template>
     <div id="app">
         <a @click="addScheduleItem">添加日程</a>
-        <calendar :scheduleItems="scheduleItems"></calendar>
+        <schedule :scheduleItems="scheduleItems"></schedule>
     </div>
 </template>
 
 <script>
-    import Calendar from './components/calendar/Calendar.vue'
+    import schedule from './components/calendar/schedule'
 
     export default {
         name: 'app',
         components: {
-            calendar: Calendar
+            schedule: schedule
         },
         data() {
             return {
