@@ -1,23 +1,24 @@
 <template>
     <div class="calendar">
         <div class="time-list">
-            <div class="item" v-for="(dayTime,i) in dayTimes" :key="dayTime.id">
+            <div class="item" :style="{height:dayTimeHeight+'px' }" v-for="(dayTime,i) in dayTimes" :key="dayTime.id">
                 <div class="time">{{dayTime.text}}</div>
                 <div class="content">
                     <div :class="{'top-line':i===0}" class="bottom-line" style="height: 100%"></div>
                 </div>
             </div>
-            <div class="schedule">
-                <div class="schedule-item" v-for="(scheduleItem,j) in scheduleItems" :key="scheduleItem.id"
+            <div class="schedule" :style="{height:dayTimeHeight*24+'px' }">
+                <div class="schedule-item" v-for="(scheduleItem,j) in scheduleItemExtends" :key="scheduleItem.id"
                      :style="scheduleItem.style">
-                    <div class="schedule-subject">{{scheduleItem.subject}}</div>
+                    <div class="schedule-subject">{{scheduleItem.title}}</div>
                 </div>
             </div>
         </div>
     </div>
 </template>
-
 <script>
+    import {isArrayNotNull, flexibleCompare} from '../utils'
+
     let dayTimes = [
         {text: '00:00', id: 0},
         {text: '01:00', id: 1},
@@ -47,167 +48,286 @@
     export default {
         name: 'calendar',
         props: {
-            scheduleItems: Array
+            dayTimeHeight: {
+                type: Number,
+                default: function () {
+                    return 40
+                }
+            },
+            scheduleItems: {
+                type: Array,
+                default: function () {
+                    return []
+                }
+            },
+            currentDate: {
+                type: Date,
+                default: function () {
+                    let today = new Date()
+                    today.setHours(0)
+                    today.setMinutes(0)
+                    return today
+                }
+            }
         },
         data() {
             return {
-                dayTimes: dayTimes,
-                positions: []
+                dayTimes: dayTimes
             }
         },
         methods: {
+            /**
+             * 扩展日程项
+             * @return {ArrayConstructor | * | watch.scheduleItems | {handler, deep, immediate} | *[]}
+             */
             scheduleItemExtends() {
-                let _this = this
-                if (_this.scheduleItems && Array.isArray(_this.scheduleItems)) {
-                    // 初始化位置二维表
-                    _this.positions = []
-                    for (let m = 0, len = 48; m < len; m++) {
-                        let rows = []
-                        for (let n = 0; m < _this.scheduleItems.length; n++) {
-                            let col = {isUse: false}
-                            rows.push(col)
-                        }
-                        _this.positions.push(rows)
-                    }
-                    for (let m = 0, len = _this.scheduleItems.length; m < len; m++) {
-                        let scheduleItem = _this.scheduleItems[m]
-                        if (scheduleItem && scheduleItem.startDate && scheduleItem.startDate instanceof Date && scheduleItem.endDate && scheduleItem.endDate instanceof Date) {
-                            let starTime = scheduleItem.startDate.getTime()
-                            let endTime = scheduleItem.endDate.getTime()
-                            let uesTime = endTime - starTime
-                            let starHours = scheduleItem.startDate.getHours()
-                            let useHours = uesTime / (1000 * 60 * 60)
-                            let endHours = scheduleItem.endDate.getHours()
-                            let starMinutes = scheduleItem.startDate.getMinutes()
-                            let endMinutes = scheduleItem.endDate.getMinutes()
-                            if (useHours > 24) {
-                                let i = starHours * 2
-                                if (starMinutes > 29) {
-                                    i++
-                                }
-                                for (; i < 48; i++) {
-                                    if (i >= 0) {
-                                        _this.positions[i][m].isUse = true
-                                    }
-                                }
-                            } else if (useHours < 1) {
-                                if (starHours >= 0) {
-                                    let i = starHours * 2
-                                    if (starMinutes > 29) {
-                                        i++
-                                    }
-                                    _this.positions[i][m].isUse = true
-                                }
-                            } else {
-                                let i = starHours * 2
-                                let j = endHours * 2
-                                if (starMinutes > 29) {
-                                    i++
-                                }
-                                if (endMinutes > 29) {
-                                    j++
-                                }
-                                for (; i <= j; i++) {
-                                    if (i >= 0) {
-                                        _this.positions[i][m].isUse = true
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    console.log(_this.positions)
 
-                    for (let m = 0, len = _this.scheduleItems.length; m < len; m++) {
-                        let style = {}
-                        let scheduleItem = _this.scheduleItems[m]
-                        if (scheduleItem && scheduleItem.startDate && scheduleItem.startDate instanceof Date && scheduleItem.endDate && scheduleItem.endDate instanceof Date) {
-                            let starTime = scheduleItem.startDate.getTime()
-                            let endTime = scheduleItem.endDate.getTime()
-                            let uesTime = endTime - starTime
-                            let starHours = scheduleItem.startDate.getHours()
-                            let useHours = uesTime / (1000 * 60 * 60)
-                            let endHours = scheduleItem.endDate.getHours()
-                            let starMinutes = scheduleItem.startDate.getMinutes()
-
-                            // 设置高度
-                            if (useHours > 24) {
-                                style.height = `${60 * 24}px`
-                            } else if (useHours < 1) {
-                                style.height = `30px`
-                            } else {
-                                style.height = `${60 * useHours}px`
-                            }
-                            //获取位置信息
-                            let h = starHours * 2
-                            if (starMinutes > 29) {
-                                h++
-                            }
-                            let useCount = -1
-                            // 设置宽度
-                            if (useHours > 24) {
-                                for (let i = starHours; i < 24; i++) {
-                                    if (_this.dayTimes[i].useCount > useHours) {
-                                        useCount = _this.dayTimes[i].useCount
-                                    }
-                                }
-                            } else if (useHours < 1) {
-                                if (starHours >= 0) {
-                                    useCount = _this.dayTimes[starHours].useCount
-                                }
-                            } else {
-                                for (let i = starHours; i <= endHours; i++) {
-                                    if (_this.dayTimes[i].useCount > useHours) {
-                                        useCount = _this.dayTimes[i].useCount
-                                    }
-                                }
-                            }
-                            if (useCount > 0) {
-                                style.width = `${100 / useCount}%`
-                                style.left = `${(100 / useCount) * (m)}%`
-                            } else if (useCount === 0) {
-                                style.width = `100%`
-                                style.left = `0`
-                            } else {
-                                style.width = `0`
-                                style.left = `0`
-                            }
-                            // 计算位置
-                            if (starMinutes >= 30) {
-                                style.top = `${starHours * 60 + 30}px`
-                            } else {
-                                style.top = `${starHours * 60}px`
-                            }
-                            _this.scheduleItems[m].style = style
-                        }
-                    }
-                }
-                return _this.scheduleItems
             },
-            computeCols(positions, start, col) {
-                let i = start
-                while (positions[i][col].isUse) {
-                    let isUse = positions[i][col + 1].isUse
-                    i++;
-                   /* if (isUse) {
-                        this.computeCols(positions, i, col + 1)
-                    }*/
+            sortScheduleItems(scheduleItems) {
+                if (isArrayNotNull(scheduleItems)) {
+                    scheduleItems.sort(function (a, b) {
+                        return a.startTime - b.startTime || // earlier events go first
+                            b.durationTime - a.durationTime || // tie? longer events go first
+                            flexibleCompare(a.title, b.title);
+                    });
                 }
+            },
+            buildSlotItemsLevels(scheduleItems) {
+                let levels = [];
+                let i;
+                let seg;
+                let j;
+                for (i = 0; i < scheduleItems.length; i++) {
+                    seg = scheduleItems[i];
+
+                    // go through all the levels and stop on the first level where there are no collisions
+                    for (j = 0; j < levels.length; j++) {
+                        if (!this.computeSlotSegCollisions(seg, levels[j]).length) {
+                            break;
+                        }
+                    }
+
+                    seg.level = j;
+
+                    (levels[j] || (levels[j] = [])).push(seg);
+                }
+                return levels;
+            },
+            computeSlotSegCollisions(seg, otherSegs, results) {
+                results = results || [];
+                for (var i = 0; i < otherSegs.length; i++) {
+                    if (this.isSlotSegCollision(seg, otherSegs[i])) {
+                        results.push(otherSegs[i]);
+                    }
+                }
+
+                return results;
+            },
+            // Do these segments occupy the same vertical space?
+            isSlotSegCollision(seg1, seg2) {
+                return seg1.bottomPoint > seg2.topPoint && seg1.topPoint < seg2.bottomPoint;
+            },
+            computeForwardSlotSegs(levels) {
+                let i, level;
+                let j, seg;
+                let k;
+
+                for (i = 0; i < levels.length; i++) {
+                    level = levels[i];
+
+                    for (j = 0; j < level.length; j++) {
+                        seg = level[j];
+
+                        seg.forwardSegs = [];
+                        for (k = i + 1; k < levels.length; k++) {
+                            this.computeSlotSegCollisions(seg, levels[k], seg.forwardSegs);
+                        }
+                    }
+                }
+            },
+            // Figure out which path forward (via seg.forwardSegs) results in the longest path until
+            // the furthest edge is reached. The number of segments in this path will be seg.forwardPressure
+            computeSlotSegPressures(seg) {
+                let forwardSegs = seg.forwardSegs;
+                let forwardPressure = 0;
+                let i, forwardSeg;
+
+                if (seg.forwardPressure === undefined) { // not already computed
+
+                    for (i = 0; i < forwardSegs.length; i++) {
+                        forwardSeg = forwardSegs[i];
+
+                        // figure out the child's maximum forward path
+                        this.computeSlotSegPressures(forwardSeg);
+
+                        // either use the existing maximum, or use the child's forward pressure
+                        // plus one (for the forwardSeg itself)
+                        forwardPressure = Math.max(
+                            forwardPressure,
+                            1 + forwardSeg.forwardPressure
+                        );
+                    }
+
+                    seg.forwardPressure = forwardPressure;
+                }
+            },
+            computeFgSegForwardBack(seg, seriesBackwardPressure, seriesBackwardCoord) {
+                var forwardSegs = seg.forwardSegs;
+                var i;
+
+                if (seg.forwardCoord === undefined) { // not already computed
+
+                    if (!forwardSegs.length) {
+
+                        // if there are no forward segments, this segment should butt up against the edge
+                        seg.forwardCoord = 1;
+                    }
+                    else {
+
+                        // sort highest pressure first
+                        this.sortScheduleItems(forwardSegs);
+
+                        // this segment's forwardCoord will be calculated from the backwardCoord of the
+                        // highest-pressure forward segment.
+                        this.computeFgSegForwardBack(forwardSegs[0], seriesBackwardPressure + 1, seriesBackwardCoord);
+                        seg.forwardCoord = forwardSegs[0].backwardCoord;
+                    }
+
+                    // calculate the backwardCoord from the forwardCoord. consider the series
+                    seg.backwardCoord = seg.forwardCoord -
+                        (seg.forwardCoord - seriesBackwardCoord) / // available width for series
+                        (seriesBackwardPressure + 1); // # of segments in the series
+
+                    // use this segment's coordinates to computed the coordinates of the less-pressurized
+                    // forward segments
+                    for (i = 0; i < forwardSegs.length; i++) {
+                        this.computeFgSegForwardBack(forwardSegs[i], 0, seg.forwardCoord);
+                    }
+                }
+            },
+            computeFgSegHorizontals() {
+                let levels;
+                let level0;
+                let i;
+                this.sortScheduleItems(this.scheduleItems);
+                levels = this.buildSlotItemsLevels(this.scheduleItems);
+                this.computeForwardSlotSegs(levels);
+                if ((level0 = levels[0])) {
+                    for (i = 0; i < level0.length; i++) {
+                        this.computeSlotSegPressures(level0[i]);
+                    }
+
+                    for (i = 0; i < level0.length; i++) {
+                        this.computeFgSegForwardBack(level0[i], 0, 0);
+                    }
+                }
+                for (let j = 0, len = this.scheduleItems.length; j < len; j++) {
+                    let style = this.setStyle(this.scheduleItems[j])
+                    this.scheduleItems[j].style = style
+                }
+            },
+            // Generates an object with CSS properties/values that should be applied to an event segment element.
+            // Contains important positioning-related properties that should be applied to any event element, customized or not.
+            setStyle(seg) {
+                let backwardCoord = seg.backwardCoord; // the left side if LTR. the right side if RTL. floating-point
+                var forwardCoord = seg.forwardCoord; // the right side if LTR. the left side if RTL. f
+                let props = {} // get top/bottom first
+                let left; // amount of space from left edge, a fraction of the total width
+                let right; // amount of space from right edge, a fraction of the total width
+                forwardCoord = Math.min(1, backwardCoord + (forwardCoord - backwardCoord) * 2);
+                left = backwardCoord;
+                right = 1 - forwardCoord;
+                props.zIndex = seg.level + 1; // convert from 0-base to 1-based
+                props.left = left * 100 + '%';
+                if (seg.forwardPressure) {
+                    let unit = (1 - (right + left)) / 2;
+                    right += unit;
+                    props.right = right * 100 + '%';
+                } else {
+                    props.right = right * 100 + '%';
+                }
+                props.top = seg.top + 'px';
+                props.bottom = seg.bottom + 'px';
+                return props;
             }
         },
-        computed: {},
-        watch: {
-            scheduleItems: {
-                handler: function (val, oldVal) {
-                    this.scheduleItemExtends()
-                },
-                deep: true,
-                immediate: true
+        computed: {
+            scheduleItemExtends() {
+                if (isArrayNotNull(this.scheduleItems)) {
+                    for (let m = 0, len = this.scheduleItems.length; m < len; m++) {
+                        let scheduleItem = this.scheduleItems[m]
+                        if (scheduleItem && scheduleItem.startDate && scheduleItem.startDate instanceof Date && scheduleItem.endDate && scheduleItem.endDate instanceof Date) {
+                            let currentStartTime = this.currentDate.getTime()
+                            let currentEndTime = currentStartTime + (1000 * 60 * 60 * 24)
+                            let startTime = scheduleItem.startDate.getTime()
+                            let endTime = scheduleItem.endDate.getTime()
+                            let durationTime = endTime - startTime
+                            let startHours = scheduleItem.startDate.getHours()
+                            let endHours = scheduleItem.endDate.getHours()
+                            let startMinutes = scheduleItem.startDate.getMinutes()
+                            let endMinutes = scheduleItem.endDate.getMinutes()
+                            this.scheduleItems[m].startTime = startTime
+                            this.scheduleItems[m].endTime = endTime
+                            this.scheduleItems[m].durationTime = durationTime
+                            // 设置高度
+                            if (startTime < currentEndTime && endTime > currentStartTime) {
+                                if (startTime < currentStartTime && endTime > currentEndTime) {
+                                    this.scheduleItems[m].topPoint = 0
+                                    this.scheduleItems[m].bottomPoint = 24 * this.dayTimeHeight
+                                    this.scheduleItems[m].top = 0
+                                    this.scheduleItems[m].bottom = 0
+                                } else if (startTime < currentStartTime && endTime < currentEndTime) {
+                                    this.scheduleItems[m].topPoint = 0
+                                    this.scheduleItems[m].top = 0
+                                    let sC = endHours * 2 + (((endMinutes + 1) / 30) >= 1 ? 1 : 0)
+                                    let bottom = sC * (this.dayTimeHeight / 2)
+                                    this.scheduleItems[m].bottomPoint = bottom
+                                    this.scheduleItems[m].bottom = 24 * this.dayTimeHeight - bottom
+                                } else if (startTime > currentStartTime && endTime > currentEndTime) {
+                                    let top = startHours * this.dayTimeHeight + (((startMinutes + 1) / 30) >= 1 ? (this.dayTimeHeight / 2) : 0)
+                                    this.scheduleItems[m].topPoint = top
+                                    this.scheduleItems[m].top = top
+                                    this.scheduleItems[m].bottomPoint = 24 * this.dayTimeHeight
+                                    this.scheduleItems[m].bottom = 0
+                                } else if (startTime >= currentStartTime && endTime <= currentEndTime) {
+                                    let top = startHours * this.dayTimeHeight + (((startMinutes + 1) / 30) >= 1 ? (this.dayTimeHeight / 2) : 0)
+                                    let sC = (endHours * 2 + (((endMinutes + 1) / 30) >= 1 ? 1 : 0)) - (startHours * 2 + (((startMinutes + 1) / 30) >= 1 ? 1 : 0))
+                                    let bottom = sC * (this.dayTimeHeight / 2) + top
+                                    this.scheduleItems[m].topPoint = top
+                                    this.scheduleItems[m].bottomPoint = bottom
+                                    this.scheduleItems[m].top = top
+                                    this.scheduleItems[m].bottom = 24 * this.dayTimeHeight - bottom
+                                } else {
+                                    this.scheduleItems[m].topPoint = 0
+                                    this.scheduleItems[m].bottomPoint = 0
+                                    this.scheduleItems[m].top = ''
+                                    this.scheduleItems[m].bottom = ''
+                                }
+                            } else {
+                                // 日程不在当天
+                                this.scheduleItems.splice(m, 1)
+                                len--
+                                m--
+                            }
+
+                        } else {
+                            console.error('日程项必须有startDate,endDate属性,且必须为Date对象')
+                            this.scheduleItems = []
+                            return
+                        }
+                    }
+                    this.computeFgSegHorizontals()
+                } else {
+                    this.scheduleItems = []
+                }
+                return this.scheduleItems
             }
-        }
+        },
+        watch: {}
     }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to _this component only -->
+<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="less">
     .calendar {
         .time-list {
@@ -216,7 +336,6 @@
             z-index: 0;
             .item {
                 display: flex;
-                height: 60px;
                 width: 100%;
                 .time {
                     color: rgb(153, 153, 153);
@@ -240,7 +359,6 @@
             .schedule {
                 position: absolute;
                 z-index: 1;
-                height: 100%;
                 left: 60px;
                 right: 0;
                 .schedule-item {
