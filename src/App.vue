@@ -17,8 +17,9 @@
             return {
                 scheduleItems: [{
                     startDate: new Date(2018, 3, 18, 10, 30),
-                    endDate: new Date(2018, 3, 18, 17, 30),
-                    title: '主题1'
+                    endDate: new Date(2018, 3, 20, 17, 30),
+                    title: '主题1',
+                    color: 'blue'
                 }, {
                     startDate: new Date(2018, 3, 18, 10, 30),
                     endDate: new Date(2018, 3, 20, 17, 30),

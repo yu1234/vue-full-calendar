@@ -249,7 +249,7 @@
                 props.top = seg.top + 'px';
                 props.bottom = seg.bottom + 'px';
                 if (seg.color) {
-                    props.backgroundColor = seg.color
+                    props.background = seg.color
                     props.borderLeftColor = seg.color
                 }
                 return props;
