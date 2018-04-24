@@ -1,17 +1,21 @@
 <template>
     <div id="app">
         <a @click="addScheduleItem">添加日程</a>
-        <schedule :scheduleItems="scheduleItems"></schedule>
+        <!--<schedule :scheduleItems="scheduleItems"></schedule>-->
+        <day-schedule :scheduleItems="scheduleItems" :currentDate="currentDate"></day-schedule>
+        <a @click="addScheduleItem">添加日程</a>
     </div>
 </template>
 
 <script>
     import schedule from './components/calendar/schedule'
+    import daySchedule from './components/calendar/day-schedule'
 
     export default {
         name: 'app',
         components: {
-            schedule: schedule
+            schedule: schedule,
+            'day-schedule': daySchedule
         },
         data() {
             return {
@@ -19,7 +23,7 @@
                     startDate: new Date(2018, 3, 18, 10, 30),
                     endDate: new Date(2018, 3, 20, 17, 30),
                     title: '主题1',
-                    color: 'blue'
+                    color: '#222222'
                 }, {
                     startDate: new Date(2018, 3, 18, 10, 30),
                     endDate: new Date(2018, 3, 20, 17, 30),
@@ -44,14 +48,15 @@
                     startDate: new Date(2018, 3, 19, 3, 30),
                     endDate: new Date(2018, 3, 19, 8, 0),
                     title: '主题7'
-                }]
+                }],
+                currentDate: new Date(2018, 3, 18)
             }
         },
         methods: {
             addScheduleItem() {
                 let scheduleItem = {
-                    startDate: new Date(2018, 4, 19, 3, 30),
-                    endDate: new Date(2018, 4, 19, 8, 0),
+                    startDate: new Date(2018, 3, 18, 3, 30),
+                    endDate: new Date(2018, 3, 19, 8, 0),
                     title: '主题三'
                 }
                 this.scheduleItems.push(scheduleItem)
@@ -65,5 +70,10 @@
         font-family: 'Avenir', Helvetica, Arial, sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+        padding: 0;
+        margin: 0;
     }
 </style>
