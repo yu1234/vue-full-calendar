@@ -1,5 +1,5 @@
 <template>
-    <div class="ds-daySchedule">
+    <div class="ds-daySchedule" :style="{height:dayTimeHeight*24+'px'}">
         <div class="ds-time-list">
             <div class="ds-item" :style="{height:dayTimeHeight+'px' }" v-for="(dayTime,i) in dayTimes"
                  :key="dayTime.id">
@@ -8,11 +8,11 @@
                     <div :class="{'ds-top-line':i===0}" class="ds-bottom-line" style="height: 100%"></div>
                 </div>
             </div>
-            <div class="ds-schedule" :style="{height:dayTimeHeight*24+'px' }">
-                <div class="ds-schedule-item" v-for="(scheduleItem) in daySchedules" :key="scheduleItem.id"
-                     :style="scheduleItem.style">
-                    <div class="ds-schedule-subject">{{scheduleItem.title}}</div>
-                </div>
+        </div>
+        <div class="ds-schedule" :style="{height:dayTimeHeight*24+'px'}">
+            <div class="ds-schedule-item" v-for="(scheduleItem,j) in daySchedules" :key="scheduleItem.id"
+                 :style="scheduleItem.style" v-if="scheduleItem.show" @click="scheduleItemClick(scheduleItem,j)">
+                <div class="ds-schedule-subject">{{scheduleItem.title}}</div>
             </div>
         </div>
     </div>
@@ -44,12 +44,12 @@
         {text: '20:00', id: 20},
         {text: '21:00', id: 21},
         {text: '22:00', id: 22},
-        {text: '23:00', id: 23},
+        {text: '23:00', id: 23}
     ]
     export default {
         name: 'day-schedule',
         mounted: function () {
-            this.daySchedules = this.setDaySchedules(this.scheduleItems)
+            this.daySchedules = this.setDaySchedules(this.schedules)
             if (this.currentDate && this.currentDate instanceof Date) {
                 this.currentDate.setHours(0)
                 this.currentDate.setMinutes(0)
@@ -62,7 +62,7 @@
                     return 40
                 }
             },
-            scheduleItems: {
+            schedules: {
                 type: Array,
                 default: function () {
                     return []
@@ -90,7 +90,7 @@
                     scheduleItems.sort(function (a, b) {
                         return a.startTime - b.startTime || // earlier events go first
                             b.durationTime - a.durationTime || // tie? longer events go first
-                            flexibleCompare(a.title, b.title);
+                            flexibleCompare(a.title, b.title)
                     })
                 }
             },
@@ -111,7 +111,7 @@
                     levels[j] || (levels[j] = [])
                     levels[j].push(seg)
                 }
-                return levels;
+                return levels
             },
             computeSlotSegCollisions: function (seg, otherSegs, results) {
                 results = results || []
@@ -123,7 +123,7 @@
                 return results
             },
             // Do these segments occupy the same vertical space?
-            isSlotSegCollision(seg1, seg2) {
+            isSlotSegCollision: function (seg1, seg2) {
                 return seg1.bottomPoint > seg2.topPoint && seg1.topPoint < seg2.bottomPoint
             },
             computeForwardSlotSegs: function (levels) {
@@ -155,7 +155,7 @@
                     for (i = 0; i < forwardSegs.length; i++) {
                         forwardSeg = forwardSegs[i]
                         // figure out the child's maximum forward path
-                        this.computeSlotSegPressures(forwardSeg);
+                        this.computeSlotSegPressures(forwardSeg)
                         // either use the existing maximum, or use the child's forward pressure
                         // plus one (for the forwardSeg itself)
                         forwardPressure = Math.max(
@@ -163,7 +163,7 @@
                             1 + forwardSeg.forwardPressure
                         )
                     }
-                    seg.forwardPressure = forwardPressure;
+                    seg.forwardPressure = forwardPressure
                 }
             },
             computeFgSegForwardBack: function (seg, seriesBackwardPressure, seriesBackwardCoord) {
@@ -201,7 +201,7 @@
                 this.computeForwardSlotSegs(levels)
                 if ((level0 = levels[0])) {
                     for (i = 0; i < level0.length; i++) {
-                        this.computeSlotSegPressures(level0[i]);
+                        this.computeSlotSegPressures(level0[i])
                     }
                     for (i = 0; i < level0.length; i++) {
                         this.computeFgSegForwardBack(level0[i], 0, 0)
@@ -226,8 +226,8 @@
                 props.zIndex = seg.level + 1 // convert from 0-base to 1-based
                 props.left = left * 100 + '%'
                 if (seg.forwardPressure) {
-                    let unit = (1 - (right + left)) / 2;
-                    right += unit;
+                    let unit = (1 - (right + left)) / 2
+                    right += unit
                     props.right = right * 100 + '%'
                 } else {
                     props.right = right * 100 + '%'
@@ -259,20 +259,20 @@
                             scheduleItem.endTime = endTime
                             scheduleItem.durationTime = durationTime
                             // 设置高度
-                            if (startTime < currentEndTime && endTime > currentStartTime) {
+                            if (startTime <= currentEndTime && endTime >= currentStartTime) {
                                 if (startTime < currentStartTime && endTime > currentEndTime) {
                                     scheduleItem.topPoint = 0
                                     scheduleItem.bottomPoint = 24 * this.dayTimeHeight
                                     scheduleItem.top = 0
                                     scheduleItem.bottom = 0
-                                } else if (startTime < currentStartTime && endTime < currentEndTime) {
+                                } else if (startTime <= currentStartTime && endTime <= currentEndTime) {
                                     scheduleItem.topPoint = 0
                                     scheduleItem.top = 0
                                     let sC = endHours * 2 + (((endMinutes + 1) / 30) >= 1 ? 1 : 0)
                                     let bottom = sC * (this.dayTimeHeight / 2)
                                     scheduleItem.bottomPoint = bottom
                                     scheduleItem.bottom = 24 * this.dayTimeHeight - bottom
-                                } else if (startTime > currentStartTime && endTime > currentEndTime) {
+                                } else if (startTime >= currentStartTime && endTime >= currentEndTime) {
                                     let top = startHours * this.dayTimeHeight + (((startMinutes + 1) / 30) >= 1 ? (this.dayTimeHeight / 2) : 0)
                                     scheduleItem.topPoint = top
                                     scheduleItem.top = top
@@ -289,33 +289,52 @@
                                 } else {
                                     scheduleItem.topPoint = 0
                                     scheduleItem.bottomPoint = 0
-                                    scheduleItem.top = ''
-                                    scheduleItem.bottom = ''
+                                    scheduleItem.top = 0
+                                    scheduleItem.bottom = 0
                                 }
-                                r.push(scheduleItem)
+                                scheduleItem.show = true
+                            } else {
+                                scheduleItem.show = false
                             }
                         } else {
+                            scheduleItem.show = false
                             console.error('日程项必须有startDate,endDate属性,且必须为Date对象')
-                            return r
                         }
+                        r.push(scheduleItem)
                     }
-                    this.computeFgSegHorizontals(r)
+                    if (isArrayNotNull(r)) {
+                        this.computeFgSegHorizontals(r)
+                    }
                 }
                 return r
+            },
+            scheduleItemClick: function (item, index) {
+                let p = {schedule: item, index: index}
+                if (isArrayNotNull(this.schedules) && item && item.id) {
+                    for (let i = 0, len = this.schedules.length; i < len; i++) {
+                        let st = this.schedules[i]
+                        if (st.id === item.id) {
+                            p.schedule = st
+                            p.index = i
+                            break
+                        }
+                    }
+                }
+                this.$emit('scheduleClick', p.schedule, p.index)
+                this.$emit('schedule-click', p.schedule, p.index)
             }
         },
         computed: {},
         watch: {
-            scheduleItems: function (newVal) {
+            schedules: function (newVal) {
                 this.daySchedules = this.setDaySchedules(newVal)
             },
             currentDate: function (newVal) {
                 if (newVal && newVal instanceof Date) {
                     this.currentDate.setHours(0)
                     this.currentDate.setMinutes(0)
-                    this.daySchedules = this.setDaySchedules(this.scheduleItems)
+                    this.daySchedules = this.setDaySchedules(this.schedules)
                 }
-
             }
         }
     }
@@ -324,18 +343,19 @@
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="less">
     .ds-daySchedule {
+        position: relative;
         .ds-time-list {
+            position: absolute;
             display: flex;
             flex-direction: column;
             z-index: 0;
+            width: 100%;
             .ds-item {
                 display: flex;
                 width: 100%;
-                .time {
+                .ds-time {
                     color: rgb(153, 153, 153);
-                    font-size: 15px;
                     margin-right: 15px;
-                    line-height: .6;
                     width: 40px;
                 }
                 .ds-content {
@@ -350,20 +370,20 @@
                     }
                 }
             }
-            .ds-schedule {
+        }
+        .ds-schedule {
+            position: absolute;
+            z-index: 1;
+            left: 55px;
+            right: 0;
+            .ds-schedule-item {
                 position: absolute;
-                z-index: 1;
-                left: 45px;
-                right: 0;
-                .ds-schedule-item {
-                    position: absolute;
-                    background-color: rgba(224, 111, 46, .25);
-                    border-left: rgb(224, 111, 46) 2px solid;
-                    .ds-schedule-subject {
-                        color: black;
-                        word-break: break-all;
-                        font-weight: 600;
-                    }
+                background-color: rgba(224, 111, 46, .25);
+                border-left: rgb(224, 111, 46) 2px solid;
+                .ds-schedule-subject {
+                    color: black;
+                    word-break: break-all;
+                    font-weight: 600;
                 }
             }
         }
