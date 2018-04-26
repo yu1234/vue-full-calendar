@@ -44,7 +44,6 @@
                 </div>
             </div>
         </div>
-        <day-schedule style="margin: 0 15px;" :scheduleItems="scheduleItems" v-if="scheduleType==='day'"></day-schedule>
     </div>
 </template>
 

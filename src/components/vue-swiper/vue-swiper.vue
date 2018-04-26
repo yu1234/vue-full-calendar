@@ -58,7 +58,7 @@
                 default: 500
             }
         },
-        data() {
+        data: function () {
             return {
                 currentPage: 1,
                 lastPage: 1,
@@ -74,7 +74,7 @@
                 transitionDuration: 0
             };
         },
-        mounted() {
+        mounted: function () {
             this._onTouchMove = this._onTouchMove.bind(this);
             this._onTouchEnd = this._onTouchEnd.bind(this);
             this.slideEls = [].map.call(this.$refs.swiperWrap.children, el => el);
@@ -87,27 +87,31 @@
                 this.setPage(this.currentPage);
             }
         },
-        updated(){
+        updated: function () {
             console.log('updated')
         },
         methods: {
-            next() {
+            next: function () {
                 var page = this.currentPage;
-                if (page < this.slideEls.length || this.loop) {
+                if (page < this.slideEls.length) {
                     this.setPage(page + 1);
+                } else if (this.loop && page >= this.slideEls.length) {
+                    this.setPage(1)
                 } else {
                     this._revert();
                 }
             },
-            prev() {
+            prev: function () {
                 var page = this.currentPage;
                 if (page > 1 || this.loop) {
                     this.setPage(page - 1);
+                } else if (this.loop && page <= 1) {
+                    this.setPage(this.slideEls.length)
                 } else {
                     this._revert();
                 }
             },
-            setPage(page, noAnimation) {
+            setPage: function (page, noAnimation) {
                 var self = this;
                 this.lastPage = this.currentPage;
                 if (page === 0) {
@@ -133,13 +137,13 @@
                     this._onTransitionStart();
                 }
             },
-            isHorizontal() {
+            isHorizontal: function () {
                 return this.direction === HORIZONTAL;
             },
-            isVertical() {
+            isVertical: function () {
                 return this.direction === VERTICAL;
             },
-            _onTouchStart(e) {
+            _onTouchStart: function (e) {
                 this.startPos = this._getTouchPos(e);
                 this.delta = 0;
                 this.startTranslate = this._getTranslateOfPage(this.currentPage);
@@ -152,7 +156,7 @@
                 document.addEventListener('mousemove', this._onTouchMove, false);
                 document.addEventListener('mouseup', this._onTouchEnd, false);
             },
-            _onTouchMove(e) {
+            _onTouchMove: function (e) {
                 this.delta = this._getTouchPos(e) - this.startPos;
 
                 if (!this.performanceMode) {
@@ -164,16 +168,16 @@
                     e.preventDefault();
                 }
             },
-            _onTouchEnd() {
+            _onTouchEnd: function () {
                 this.dragging = false;
                 this.transitionDuration = this.speed;
                 var isQuickAction = new Date().getTime() - this.startTime < 1000;
                 if (this.delta < -100 || (isQuickAction && this.delta < -15)) {
                     this.next();
-                    this.$emit('slider-next','next', this.currentPage);
+                    this.$emit('slider-next', 'next', this.currentPage);
                 } else if (this.delta > 100 || (isQuickAction && this.delta > 15)) {
                     this.prev();
-                    this.$emit('slider-prev','prev', this.currentPage);
+                    this.$emit('slider-prev', 'prev', this.currentPage);
                 } else {
                     this._revert();
                 }
@@ -183,7 +187,7 @@
                 document.removeEventListener('mousemove', this._onTouchMove);
                 document.removeEventListener('mouseup', this._onTouchEnd);
             },
-            _onWheel(e) {
+            _onWheel: function (e) {
                 if (this.mousewheelControl) {
                     // TODO Support apple magic mouse and trackpad.
                     if (!this.transitioning) {
@@ -197,14 +201,14 @@
 
                 }
             },
-            _revert() {
+            _revert: function () {
                 this.setPage(this.currentPage);
             },
-            _getTouchPos(e) {
+            _getTouchPos: function (e) {
                 var key = this.isHorizontal() ? 'pageX' : 'pageY';
                 return e.changedTouches ? e.changedTouches[0][key] : e[key];
             },
-            _onTransitionStart() {
+            _onTransitionStart: function () {
                 this.transitioning = true;
                 this.transitionDuration = this.speed;
                 if (this._isPageChanged()) {
@@ -213,7 +217,7 @@
                     this.$emit('slide-revert-start', this.currentPage);
                 }
             },
-            _onTransitionEnd() {
+            _onTransitionEnd: function () {
                 this.transitioning = false;
                 this.transitionDuration = 0;
                 this.delta = 0;
@@ -223,18 +227,18 @@
                     this.$emit('slide-revert-end', this.currentPage);
                 }
             },
-            _isPageChanged() {
+            _isPageChanged: function () {
                 return this.lastPage !== this.currentPage;
             },
-            _setTranslate(value) {
+            _setTranslate: function (value) {
                 var translateName = this.isHorizontal() ? 'translateX' : 'translateY';
                 this[translateName] = value;
             },
-            _getTranslate() {
+            _getTranslate: function () {
                 var translateName = this.isHorizontal() ? 'translateX' : 'translateY';
                 return this[translateName];
             },
-            _getTranslateOfPage(page) {
+            _getTranslateOfPage: function (page) {
                 if (page === 0) return 0;
 
                 var propName = this.isHorizontal() ? 'clientWidth' : 'clientHeight';
@@ -242,14 +246,8 @@
                     return i > page - 2 ? total : total + el[propName];
                 }, 0) + this.translateOffset;
             },
-            _createLoop() {
-                var propName = this.isHorizontal() ? 'clientWidth' : 'clientHeight';
-                var swiperWrapEl = this.$refs.swiperWrap;
-                var duplicateFirstChild = swiperWrapEl.firstElementChild.cloneNode(true);
-                var duplicateLastChild = swiperWrapEl.lastElementChild.cloneNode(true);
-                swiperWrapEl.insertBefore(duplicateLastChild, swiperWrapEl.firstElementChild);
-                swiperWrapEl.appendChild(duplicateFirstChild);
-                this.translateOffset = -duplicateLastChild[propName];
+            _createLoop: function () {
+               
             }
         }
     };
