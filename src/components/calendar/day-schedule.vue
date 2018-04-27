@@ -1,5 +1,5 @@
 <template>
-    <div class="ds-daySchedule" :style="{height:dayTimeHeight*24+'rem'}">
+    <div class="ds-daySchedule" :style="{height:dayTimeHeight*24+'rem'}" ref="daySchedule">
         <div class="ds-time-list">
             <div class="ds-item" :style="{height:dayTimeHeight+'rem' }" v-for="(dayTime,i) in dayTimes"
                  :key="dayTime.id">
@@ -81,7 +81,8 @@
         data: function () {
             return {
                 dayTimes: dayTimes,
-                daySchedules: []
+                daySchedules: [],
+                scrollTo: this.dayTimeHeight * 24
             }
         },
         methods: {
@@ -303,6 +304,9 @@
                             console.error('日程项必须有startDate,endDate属性,且必须为Date对象')
                         }
                         if (scheduleItem.show) {
+                            if (scheduleItem.top < this.scrollTo) {
+                                this.scrollTo = scheduleItem.top
+                            }
                             r.push(scheduleItem)
                         }
                     }
@@ -310,6 +314,9 @@
                         this.computeFgSegHorizontals(r)
                     }
                 }
+                console.log(this.scrollTo)
+                console.log(this.$refs.daySchedule)
+                this.$refs.daySchedule.scrollTop = parseInt(this.scrollTo * 20)
                 return r
             },
             scheduleItemClick: function (item, index) {

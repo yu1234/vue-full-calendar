@@ -1,9 +1,13 @@
 <template>
     <div id="app">
-        <!-- <a @click="addScheduleItem">添加日程</a>-->
-        <schedule></schedule>
-       <!-- <day-schedule :schedules="scheduleItems" :currentDate="currentDate"></day-schedule>
-        <time-line-schedule :schedules="scheduleItems" style="margin: 0 .75rem" :currentDate="currentDate"></time-line-schedule>-->
+        <a @click="addScheduleItem">添加日程</a>
+       <schedule></schedule>
+       <day-schedule :schedules="scheduleItems" :currentDate="currentDate"></day-schedule>
+       <!-- <time-line-schedule :schedules="scheduleItems" style="margin: 0 .75rem" :currentDate="currentDate"></time-line-schedule>-->
+       <!-- <tb-swiper :loop="true">
+            <tb-slide>1</tb-slide>
+            <tb-slide>2</tb-slide>
+        </tb-swiper>-->
     </div>
 </template>
 
@@ -11,13 +15,17 @@
     import schedule from './components/calendar/calendar'
     import daySchedule from './components/calendar/day-schedule'
     import timeLineSchedule from './components/calendar/time-line-schedule'
+    import tbSwiper from './components/swiper/tb-swiper'
+    import tbSlide from './components/swiper/tb-slide'
 
     export default {
         name: 'app',
         components: {
             schedule: schedule,
             'day-schedule': daySchedule,
-            'time-line-schedule': timeLineSchedule
+            'time-line-schedule': timeLineSchedule,
+            'tb-swiper':tbSwiper,
+            'tb-slide':tbSlide
         },
         data() {
             return {
@@ -33,7 +41,7 @@
                     title: '主题2',
                     content: '2222222222222333333333'
                 }, {
-                    startDate: new Date(2018, 3, 17, 12, 0),
+                    startDate: new Date(2018, 3, 18, 12, 0),
                     endDate: new Date(2018, 3, 20, 12, 30),
                     title: '主题3',
                     content: '2222222222222333333333'
@@ -58,7 +66,8 @@
                     title: '主题7',
                     content: '2222222222222333333333'
                 }],
-                currentDate: new Date(2018, 3, 18)
+                currentDate: new Date(2018, 3, 18),
+                show:false
             }
         },
         methods: {
@@ -69,6 +78,7 @@
                     title: '主题三'
                 }
                 this.scheduleItems.push(scheduleItem)
+                this.show=!this.show
             }
         }
     }

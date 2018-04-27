@@ -7,12 +7,12 @@
                 </div>
             </div>
             <div class="calendar-swiper">
-                <swiper ref="swiper" direction="horizontal" :loop="true" @slider-next="slideChange"
-                        @slider-prev="slideChange"
-                        v-if="calendar.calendarSwiperInit">
-                    <slide>
-                        <div class="flex-box" style="font-size: 17px;" v-if="calendar.week1&&calendar.week1.length>0">
-                            <div class="flex-item" style="text-align: center" v-for="(weekday,i) in calendar.week1"
+                <tb-swiper ref="swiper" direction="horizontal" :loop="true" @slider-next="slideChange"
+                           @slider-prev="slideChange"
+                           v-if="calendar.calendarSwiperInit">
+                    <tb-slide>
+                        <div class="flex-box" style="font-size: 17px;">
+                            <div class="flex-item" style="text-align: center" v-for="(weekday,i) in calendar.week0"
                                  :key="weekday.id">
                                 <avatar class="calendar-selected"
                                         :class="{'calendar-unselected':calendar.selectedDateIndex!==i,'calendar-selected':calendar.selectedDateIndex===i}">
@@ -23,10 +23,10 @@
                                 </avatar>
                             </div>
                         </div>
-                    </slide>
-                    <slide>
-                        <div class="flex-box" style="font-size: 17px;" v-if="calendar.week1&&calendar.week2.length>0">
-                            <div class="flex-item" style="text-align: center" v-for="(weekday,i) in calendar.week2"
+                    </tb-slide>
+                    <tb-slide>
+                        <div class="flex-box" style="font-size: 17px;">
+                            <div class="flex-item" style="text-align: center" v-for="(weekday,i) in calendar.week1"
                                  :key="weekday.id">
                                 <avatar :class="{'calendar-unselected':calendar.selectedDateIndex!==i,'calendar-selected':calendar.selectedDateIndex===i}">
                                     <div style="display: inline-flex;flex-direction: column;">
@@ -36,8 +36,8 @@
                                 </avatar>
                             </div>
                         </div>
-                    </slide>
-                </swiper>
+                    </tb-slide>
+                </tb-swiper>
                 <div class="text-center" style="margin-top: 15px">
                     <span style="font-size: 15px;">{{getDateInfo}}</span>&nbsp;&nbsp;
                     <i class="iconfont  icon-calendar_icon_pulldo" style="font-size: .75rem;"></i>
@@ -52,6 +52,8 @@
     import swiper from '../vue-swiper/vue-swiper'
     import slide from '../vue-swiper/vue-slide'
     import avatar from '../avatar/avatar'
+    import tbSwiper from '../swiper/tb-swiper'
+    import tbSlide from '../swiper/tb-slide'
 
     export default {
         name: "calendar",
@@ -59,7 +61,9 @@
             'day-schedule': daySchedule,
             swiper: swiper,
             slide: slide,
-            avatar: avatar
+            avatar: avatar,
+            'tb-swiper': tbSwiper,
+            'tb-slide': tbSlide
         },
         props: {
             scheduleItems: {
@@ -81,9 +85,9 @@
                 cnWeek: ['周日', '周一', '周二', '周三', '周四', '周五', '周六'],
                 calendar: {
                     calendarSwiperInit: false,
-                    currentPage: 1,
+                    currentPage: 0,
+                    week0: [],
                     week1: [],
-                    week2: [],
                     selectedDate: null,
                     selectedDateIndex: 0
                 }
@@ -93,26 +97,27 @@
             this.initCalendar()
         },
         methods: {
-            slideChange(type, pageNumber) {
+            slideChange(type, newSlideIndex, oldSlideIndex) {
                 let today = new Date();
-                let cWeek = this.calendar[`week${this.currentPage}`]
-                this.calendar[`week${pageNumber}`] = []
+                let cWeek = this.calendar[`week${oldSlideIndex}`]
                 if (type === 'next' && cWeek && cWeek.length > 6) {
-                    this.calendar[`week${pageNumber}`] = this.getWeek(type, cWeek[6].date)
-                    this.currentPage = pageNumber
+                    this.calendar[`week${newSlideIndex}`] = this.getWeek(type, cWeek[6].date)
+                    this.currentPage = newSlideIndex
                 } else if (type === 'prev' && cWeek && cWeek.length > 0) {
-                    this.calendar[`week${pageNumber}`] = this.getWeek(type, cWeek[0].date)
-                    this.currentPage = pageNumber
+                    this.calendar[`week${newSlideIndex}`] = this.getWeek(type, cWeek[0].date)
+                    this.currentPage = newSlideIndex
                 }
+                console.log(this.calendar)
             },
             initCalendar() {
                 let today = new Date()
                 this.calendar.selectedDate = today
                 this.calendar.selectedDateIndex = (today.getDay() === 0 ? 6 : today.getDay() - 1)
-                this.calendar.week1 = this.getWeek('curr')
+                this.calendar.week0 = this.getWeek('curr')
+                this.calendar.week1 = this.getWeek('next', this.calendar.week0[0].date)
                 this.$nextTick(function () {
                     this.calendar.calendarSwiperInit = true
-                    this.currentPage = 1
+                    this.currentPage = 0
                 });
             },
             getWeek(type, dateObj) {
