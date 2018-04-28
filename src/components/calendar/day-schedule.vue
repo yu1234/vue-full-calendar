@@ -82,7 +82,7 @@
             return {
                 dayTimes: dayTimes,
                 daySchedules: [],
-                scrollTo: this.dayTimeHeight * 24
+                scrollTop: this.dayTimeHeight * 24
             }
         },
         methods: {
@@ -304,8 +304,8 @@
                             console.error('日程项必须有startDate,endDate属性,且必须为Date对象')
                         }
                         if (scheduleItem.show) {
-                            if (scheduleItem.top < this.scrollTo) {
-                                this.scrollTo = scheduleItem.top
+                            if (scheduleItem.top < this.scrollTop) {
+                                this.scrollTop = scheduleItem.top
                             }
                             r.push(scheduleItem)
                         }
@@ -314,9 +314,6 @@
                         this.computeFgSegHorizontals(r)
                     }
                 }
-                console.log(this.scrollTo)
-                console.log(this.$refs.daySchedule)
-                this.$refs.daySchedule.scrollTop = parseInt(this.scrollTo * 20)
                 return r
             },
             scheduleItemClick: function (item, index) {
@@ -349,6 +346,9 @@
                     this.currentDate.setMinutes(0)
                     this.daySchedules = this.setDaySchedules(this.schedules)
                 }
+            },
+            daySchedules:function () {
+                this.$emit('done', this.scrollTop)
             }
         }
     }
@@ -358,6 +358,7 @@
 <style scoped lang="less">
     .ds-daySchedule {
         position: relative;
+        overflow: auto;
         .ds-time-list {
             position: absolute;
             display: flex;

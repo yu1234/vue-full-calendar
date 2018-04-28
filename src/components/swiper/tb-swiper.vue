@@ -120,17 +120,12 @@
                 if (newSlideIndex >= 0 && newSlideIndex < slides.length && oldSlideIndex >= 0 && oldSlideIndex < slides.length) {
                     let newSlide = slides[newSlideIndex]
                     let oldSlide = slides[oldSlideIndex]
-                    if (type === 'prev') {
-                        oldSlide && oldSlide.setTransitionName(type)
-                        newSlide && newSlide.setTransitionName(type)
-                    } else if (type === 'next') {
-                        oldSlide && oldSlide.setTransitionName(type)
-                        newSlide && newSlide.setTransitionName(type)
-                    }
                     this.$emit(`slider-${type}`, type, newSlideIndex, oldSlideIndex)
-                    oldSlide && oldSlide.onHide()
-                    newSlide && newSlide.onShow()
-                    oldSlide && oldSlide.$nextTick().then(() => {
+                    this.$nextTick(()=>{
+                        oldSlide && oldSlide.setTransitionName(type)
+                        newSlide && newSlide.setTransitionName(type)
+                        oldSlide && oldSlide.onHide()
+                        newSlide && newSlide.onShow()
                     })
 
                     this.currentSlideIndex = newSlideIndex
@@ -144,9 +139,10 @@
     .tb-carousel {
         position: relative;
         .tb-carousel-inner {
-            position: relative;
             display: flex;
             width: 100%;
+            height: 100%;
+            transition: all 0ms ease;
         }
     }
 
