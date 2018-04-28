@@ -1,13 +1,22 @@
 <template>
     <div id="app">
-        <a @click="addScheduleItem">添加日程</a>
+       <a @click="addScheduleItem">添加日程</a>
        <schedule></schedule>
-       <day-schedule :schedules="scheduleItems" :currentDate="currentDate"></day-schedule>
+        <!--<day-schedule :schedules="scheduleItems" :currentDate="currentDate"></day-schedule>-->
        <!-- <time-line-schedule :schedules="scheduleItems" style="margin: 0 .75rem" :currentDate="currentDate"></time-line-schedule>-->
        <!-- <tb-swiper :loop="true">
             <tb-slide>1</tb-slide>
             <tb-slide>2</tb-slide>
         </tb-swiper>-->
+     <!--   <Carousel :loop="true">
+            <Slide>1</Slide>
+            <Slide>2</Slide>
+        </Carousel>-->
+       <!-- <vue-swiper :loop="true">
+            <vue-slide style="text-align: center">11111111111111111</vue-slide>
+            <vue-slide style="text-align: center">22222222222222222</vue-slide>
+            <vue-slide style="text-align: center">33333333333333333</vue-slide>
+        </vue-swiper>-->
     </div>
 </template>
 
@@ -17,7 +26,9 @@
     import timeLineSchedule from './components/calendar/time-line-schedule'
     import tbSwiper from './components/swiper/tb-swiper'
     import tbSlide from './components/swiper/tb-slide'
-
+    import { Carousel, Slide } from 'vue-carousel'
+    import vueSwiper from './components/vue-swiper/vue-swiper'
+    import vueSlide from './components/vue-swiper/vue-slide'
     export default {
         name: 'app',
         components: {
@@ -25,7 +36,11 @@
             'day-schedule': daySchedule,
             'time-line-schedule': timeLineSchedule,
             'tb-swiper':tbSwiper,
-            'tb-slide':tbSlide
+            'tb-slide':tbSlide,
+            Carousel,
+            Slide,
+            'vue-swiper':vueSwiper,
+            'vue-slide':vueSlide
         },
         data() {
             return {

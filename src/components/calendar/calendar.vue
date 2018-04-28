@@ -52,8 +52,8 @@
     import swiper from '../vue-swiper/vue-swiper'
     import slide from '../vue-swiper/vue-slide'
     import avatar from '../avatar/avatar'
-    import tbSwiper from '../swiper/tb-swiper'
-    import tbSlide from '../swiper/tb-slide'
+    import vueSlide from '../vue-swiper/vue-slide'
+    import vueSwiper from '../vue-swiper/vue-swiper'
 
     export default {
         name: "calendar",
@@ -62,8 +62,8 @@
             swiper: swiper,
             slide: slide,
             avatar: avatar,
-            'tb-swiper': tbSwiper,
-            'tb-slide': tbSlide
+            'tb-swiper': vueSwiper,
+            'tb-slide': vueSlide
         },
         props: {
             scheduleItems: {
